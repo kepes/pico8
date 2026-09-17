@@ -32,7 +32,7 @@ Unchanged since v1.
 1. In PICO-8: `load desert_strike/desert_strike.p8` (or the `desert_strike` cart from Splore), then `run`.
 2. On the title screen, 🅾️ starts the run; after game over, 🅾️ restarts.
 
-The title screen shows the poster art from `assets/desert_strike_frontpage_01.jpg`, converted to 128×128 and stored in the cart itself — the game title is not drawn by code (it's already on the poster).
+The title screen shows the poster art from `assets/desert_strike_frontpage_01.jpg`, converted to 128×128 with Floyd–Steinberg dithering (40 % strength) and a separately contrast-boosted, undithered face region so the facial features survive at 16 colours, then px9-compressed and stored in the cart itself (4388 bytes at 0x1000, i.e. the unused lower half of the sprite sheet plus the top of map memory) — the game title is not drawn by code (it's already on the poster). `assets/title_dither_compare.png` shows the dithering variants that were considered.
 
 Headless run (for development/testing), since a Lua syntax error would leave PICO-8 running forever:
 

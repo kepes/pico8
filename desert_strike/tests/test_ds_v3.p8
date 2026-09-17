@@ -57,7 +57,7 @@ function _init()
 
   tcase("v3-4 title image: px9 cache and draw_title")
   -- #include pulls in lua only: fetch the px9 map rows from the game cart
-  reload(0x2000,0x2000,0x1000,"../desert_strike.p8")
+  reload(0x1000,0x1000,0x2000,"../desert_strike.p8")
   memset(0x8000,0,0x400)
   load_title()
   seen,n={},0
