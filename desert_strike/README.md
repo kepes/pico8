@@ -2,6 +2,10 @@
 
 A scrolling, 512×512 pixel desert-arcade survival game for PICO-8 (formerly called Desert Jedi). You play a Jedi knight — swing and block with a lightsaber, and deflected shots bounce back and kill. Gems are scattered around to collect, every 15th kill summons Darth Vader (with 3 escorts), and standing still for too long draws the attention of a sandworm that can strike without warning.
 
+<a href="https://www.lexaloffle.com/bbs/?tid=159337"><img src="assets/desert_strike_frontpage_01.jpg" alt="Play Desert Strike" width="400"></a>
+
+**[▶ Play in your browser on the Lexaloffle BBS](https://www.lexaloffle.com/bbs/?tid=159337)**
+
 ## Table of contents
 
 - [Controls](#controls)
