@@ -1,2 +1,7 @@
 demos/
 .DS_Store
+# release exports (regenerable from the .p8)
+*.p8.png
+*.html
+*.js
+*.bin/
