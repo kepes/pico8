@@ -78,7 +78,7 @@ exit $rc
 
 ## Screenshot / playtest helper carts
 
-Copy the game next to the helper (or use `../game.p8`), `#include` it, stub `btn`/`btnp`, drive frames from your own `_update`, call `extcmd("screen")`, then **append the data sections** or the sheet is empty:
+Copy the game next to the helper (or use `../game.p8`), `#include` it, stub `btn`/`btnp`, drive frames from your own `_update`, call `extcmd("screen")`, then get the data sections in — either **append them** to the helper cart, or load them at runtime with `reload(dest, src, len, "../game.p8")` (e.g. `reload(0x0000,0x0000,0x3000,"../game.p8")` copies gfx + map; `0x3100,0x3100,0x1200` copies sfx + music). Test carts use the `reload` form because it needs no file surgery:
 
 ```bash
 sed -n '/^__gfx__$/,$p' game.p8 >> helper.p8

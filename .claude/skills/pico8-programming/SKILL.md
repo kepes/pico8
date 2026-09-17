@@ -7,6 +7,8 @@ description: Use when creating, editing, testing or debugging PICO-8 carts (.p8 
 
 ## Overview
 
+Applies to PICO-8 0.2.7 (cart format version 30).
+
 PICO-8 carts can be built and verified entirely from the shell: `pico8 -x` runs a cart headlessly (no window), `printh` is stdout, `extcmd("screen")` writes PNGs, and a test cart can `#include` the game and stub its inputs. Everything below was learned the hard way; follow it instead of rediscovering it.
 
 Binary on this machine: `/Applications/PICO-8.app/Contents/MacOS/pico8`. Never start PICO-8 with a window during automated work: bare `pico8`, `-run`, and **any unknown flag such as `-h`/`--help` open the GUI** (there is no help flag). The only safe invocation is `pico8 [-desktop DIR] -x cart.p8` inside a timeout. For API questions read the manual text file if present (`~/Downloads/pico-8/pico-8_manual.txt`) instead of probing flags.
@@ -22,6 +24,7 @@ Binary on this machine: `/Applications/PICO-8.app/Contents/MacOS/pico8`. Never s
 | Preview the sprite sheet as an image | `uv run --with pillow scripts/gfx_preview.py cart.p8 out.png` |
 | Test harness, runner, multi-cart split | [testing-harness.md](testing-harness.md) |
 | Cart file format (`__gfx__`, `__sfx__`, `__music__`) | [p8-format.md](p8-format.md) |
+| Less-known API and memory map | [api-notes.md](api-notes.md) |
 
 ## Gotchas that cost time
 
@@ -30,7 +33,7 @@ Binary on this machine: `/Applications/PICO-8.app/Contents/MacOS/pico8`. Never s
 | `pico8 -x` never returns | A Lua **syntax error** hangs the process; there is no exit | Always run through a timeout (`perl -e 'alarm 60; exec @ARGV' -- pico8 -x cart.p8`; macOS has no `timeout`). Treat `syntax error` in the output as failure |
 | Run exits 0 but the test did nothing | **Runtime errors** print `runtime error line N` and exit 0 | grep the output for `runtime error` |
 | `could not #include file` | `#include` accepts only paths **relative to the cart** (`../game.p8` works, absolute paths do not) | Keep helper carts next to the game or one directory below |
-| Helper cart renders sand but no sprites | `#include` pulls **Lua code only**; gfx/sfx/music stay in the source cart | `sed -n '/^__gfx__$/,$p' game.p8 >> helper.p8` after writing the helper's code |
+| Helper cart renders sand but no sprites | `#include` pulls **Lua code only**; gfx/sfx/music stay in the source cart | `reload(0,0,0x3000,"../game.p8")` at start (copies gfx+map from the other cart), or `sed -n '/^__gfx__$/,$p' game.p8 >> helper.p8` |
 | `program too large` in a test cart | The **8192-token limit** counts included code; game + many tests overflow | Split tests into several carts sharing one `test_lib.lua` (see testing-harness.md) |
 | Black sprite has holes / shows the floor | Colour **0 is transparent** in `spr()` | Paint the sprite background with an unused colour (e.g. 3) and draw with `palt(0,false) palt(3,true) spr(...) palt()`; the editor shows that colour as a background, which is expected |
 | A sprite detail is invisible in game | Its colour equals the **playfield background** (e.g. face 15 on sand 15) | Pick another palette colour **in the sprite**; do not patch it with `pal()` at draw time |

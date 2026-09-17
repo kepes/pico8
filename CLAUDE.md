@@ -7,6 +7,7 @@ Ez a mappa a PICO-8 cart-könyvtár (`~/Library/Application Support/pico-8/carts
 ```
 carts/
   CLAUDE.md                     ez a fájl
+  README.md, LICENSE            a gyűjtemény leírása (angol) és a CC BY-NC-SA 4.0 licenc
   .claude/skills/pico8-programming/   PICO-8 fejlesztői tudás (headless futtatás, formátum, teszt-harness, buktatók)
   <játék>/
     <játék>.p8                  a cart — önálló (kód + gfx + sfx + music), nincs benne #include
@@ -24,7 +25,10 @@ Jelenlegi játék: `desert_strike/` (Desert Strike, korábban Desert Jedi; v2). 
 
 - **Cart-munka előtt töltsd be a `pico8-programming` skillt** (`.claude/skills/pico8-programming/SKILL.md`): headless futtatás időkorláttal, `#include` korlátok, 8192 tokenes limit, sprite-átlátszóság, teszt-harness. Ne fedezd fel újra.
 - PICO-8 bináris: `/Applications/PICO-8.app/Contents/MacOS/pico8`. **Soha ne nyiss PICO-8 ablakot** automatizált munkában; `pico8 -x` headless módban fut.
-- Bemenet a cartban kizárólag `btn()`/`btnp()` (a tesztek stubolják). Játékszövegek angolul, dokumentáció magyarul, a skill angolul.
+- Bemenet a cartban kizárólag `btn()`/`btnp()` (a tesztek stubolják).
+- **Nyelv:** minden `README.md`, a kód-kommentek (cart, tesztek, scriptek) és a skill **angolul**; a `docs/specs`, `docs/plans` és ez a CLAUDE.md magyarul; játékszövegek angolul.
+- **Spec/terv útvonal (projekt-felülírás):** `docs/specs/` és `docs/plans/` — nem `docs/superpowers/...`.
+- **Licenc:** CC BY-NC-SA 4.0 (`LICENSE` a gyökérben, szerző Peter Kepes); új program README-jébe kerüljön licenc-sor.
 - Sprite-részletekhez ne használd a pálya háttérszínét, és ne javíts `pal()`-lal futásidőben — a sprite-ba fesd a jó színt.
 
 ## Tesztelés és commit

@@ -5,34 +5,34 @@ __lua__
 #include test_lib.lua
 function _init()
   cartdata("kepes_desert_strike_test")
-  tcase("v2-10a worm: counter only after 60 s, tremor at 600 still")
-  -- literals on purpose (spec 13/10, 14): 60 s gate; WORM_STILL = 600 = 20 s
+  tcase("v2-10a worm: counter only after 20 s, tremor at 300 still")
+  -- literals on purpose (v2.1 spec 4): 20 s gate; worm_still = 300 = 10 s
   arena()
   local w=g.worm
   check(w~=nil and w.st=="idle" and w.still==0,"worm idle at start")
   check(w.ax==px and w.ay==py,"anchor at the jedi: "..tostr(w.ax)..","..tostr(w.ay))
-  g.frames=30*59
-  step(620)
-  check(w.st=="idle","idle after 620 frames from 59 s: "..w.st)
-  check(w.still==590,"still counts only from 60 s: "..w.still)
+  g.frames=30*19
+  step(320)
+  check(w.st=="idle","idle after 320 frames from 19 s: "..w.st)
+  check(w.still==290,"still counts only from 20 s: "..w.still)
   step(10)
-  check(w.st=="tremor" and w.t==90,"tremor at 600 still, t 90: "..w.st.." "..w.t)
+  check(w.st=="tremor" and w.t==90,"tremor at 300 still, t 90: "..w.st.." "..w.t)
   check(w.ex==px and w.ey==py,"epicentre at the jedi")
-  -- moving away resets the counter (before 60 s too)
-  arena() w=g.worm g.frames=30*40
+  -- moving away resets the counter (before 20 s too)
+  arena() w=g.worm g.frames=30*10
   step(300)
-  check(w.still==0,"no counting before 60 s: "..w.still)
-  g.frames=30*60
+  check(w.still==0,"no counting before 20 s: "..w.still)
+  g.frames=30*20
   step(100)
-  check(w.still==100,"counting at 60 s: "..w.still)
+  check(w.still==100,"counting at 20 s: "..w.still)
   step(14,{[1]=true})
   check(w.still==0 and w.ax==px+21,"anchor moves + reset after >20 px: "..w.still.." "..w.ax)
   step(10,{[0]=true})
   check(w.still==10,"within 20 px keeps counting: "..w.still)
 
   tcase("v2-10b worm eats the standing jedi")
-  arena() w=g.worm g.frames=30*60
-  step(600)
+  arena() w=g.worm g.frames=30*20
+  step(300)
   check(w.st=="tremor","tremor")
   sfx_log={}
   local shook,np=0,#g.parts
@@ -64,8 +64,8 @@ function _init()
   check(g.state=="play" and g.cause==nil and not g.p.eaten and g.worm.st=="idle","new game resets worm/cause")
 
   tcase("v2-10c escape during the tremor")
-  arena() w=g.worm g.frames=30*60
-  step(600)
+  arena() w=g.worm g.frames=30*20
+  step(300)
   check(w.st=="tremor","tremor")
   step(20,{[1]=true})
   check(g.p.x>=px+29,"moved 30 px: "..(g.p.x-px))
@@ -81,12 +81,12 @@ function _init()
   check(w.st=="idle" and w.still==0,"idle after sink, counter reset: "..w.st.." "..w.still)
   check(w.ax==g.p.x and w.ay==g.p.y,"anchor reset to the jedi")
   -- bite radius: 19 px eaten, 21 px safe
-  arena() w=g.worm g.frames=30*60
-  step(690)
+  arena() w=g.worm g.frames=30*20
+  step(390)
   place(px+21,py) step(10)
   check(not g.p.dead,"21 px away: safe")
-  arena() w=g.worm g.frames=30*60
-  step(690)
+  arena() w=g.worm g.frames=30*20
+  step(390)
   place(px-19,py) step(10)
   check(g.p.dead and g.cause=="worm","19 px away: eaten")
   -- normal death has no cause

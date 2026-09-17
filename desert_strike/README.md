@@ -1,154 +1,166 @@
-# Desert Jedi
+# Desert Strike
 
-Görgetett, 512×512 pixeles sivatagi világban játszódó PICO-8 arcade túlélőjáték. Egy jedi lovagot irányítasz — fénykarddal suhintasz és blokkolsz, a kivédett lövés visszapattan és öl. Idővel drágakövek várnak begyűjtésre, minden 15. ölés után pedig felbukkan Darth Vader (3 kísérővel), és 1 percnél tovább egy helyben állva egy homokféreg is figyelmeztetés nélkül lecsaphat.
+A scrolling, 512×512 pixel desert-arcade survival game for PICO-8 (formerly called Desert Jedi). You play a Jedi knight — swing and block with a lightsaber, and deflected shots bounce back and kill. Gems are scattered around to collect, every 15th kill summons Darth Vader (with 3 escorts), and standing still for too long draws the attention of a sandworm that can strike without warning.
 
-## Tartalomjegyzék
+## Table of contents
 
-- [Irányítás](#irányítás)
-- [Futtatás](#futtatás)
-- [Görgetett világ és drágakövek](#görgetett-világ-és-drágakövek)
-- [Játékmenet](#játékmenet)
+- [Controls](#controls)
+- [Running](#running)
+- [Scrolling world and gems](#scrolling-world-and-gems)
+- [Gameplay](#gameplay)
 - [Darth Vader](#darth-vader)
-- [Homokféreg](#homokféreg)
-- [Kardszínek és pontok](#kardszínek-és-pontok)
-- [Zene és hang](#zene-és-hang)
-- [Tesztelés](#tesztelés)
-- [Fájlok](#fájlok)
-- [Kapcsolódó dokumentumok](#kapcsolódó-dokumentumok)
+- [Sandworm](#sandworm)
+- [Sword colors and points](#sword-colors-and-points)
+- [Music and sound](#music-and-sound)
+- [Testing](#testing)
+- [Files](#files)
+- [Related documents](#related-documents)
+- [License](#license)
 
-## Irányítás
+## Controls
 
-Változatlan a v1-hez képest.
+Unchanged since v1.
 
-| Gomb | Hatás |
+| Button | Effect |
 |---|---|
-| ⬅️➡️⬆️⬇️ (nyilak) | mozgás 8 irányban; a jedi a legutóbb lenyomott nyíl irányába fordul (4 nézési irány: fel/le/bal/jobb) |
-| 🅾️ (Z) | kardsuhintás |
-| ❎ (X) | blokk, amíg nyomva tartod |
+| ⬅️➡️⬆️⬇️ (arrows) | move in 8 directions; the Jedi faces the last-pressed arrow direction (4 facings: up/down/left/right) |
+| 🅾️ (Z) | sword swing |
+| ❎ (X) | block, while held |
 
-## Futtatás
+## Running
 
-1. Nyisd meg PICO-8-ban: `load desert_strike/desert_strike.p8` (vagy Splore-ból a `jedi` cart), majd `run`.
-2. Cím­képernyőn 🅾️-ra indul a menet, game over után 🅾️-ra újraindul.
+1. In PICO-8: `load desert_strike/desert_strike.p8` (or the `desert_strike` cart from Splore), then `run`.
+2. On the title screen, 🅾️ starts the run; after game over, 🅾️ restarts.
 
-Headless futtatáshoz (fejlesztéshez, teszteléshez), mivel egy Lua szintaxishiba a PICO-8-ot végtelenségig futva hagyja:
+The title screen shows the poster art from `assets/desert_strike_frontpage_01.jpg`, converted to 128×128 and stored in the cart itself — the game title is not drawn by code (it's already on the poster).
+
+Headless run (for development/testing), since a Lua syntax error would leave PICO-8 running forever:
 
 ```bash
-perl -e 'alarm 60; exec @ARGV' -- /Applications/PICO-8.app/Contents/MacOS/pico8 -x jedi.p8
+perl -e 'alarm 60; exec @ARGV' -- /Applications/PICO-8.app/Contents/MacOS/pico8 -x desert_strike.p8
 ```
 
-## Görgetett világ és drágakövek
+## Scrolling world and gems
 
-- A világ 512×512 px (4×4 képernyő), a jedi a közepén indul. A kamera követi a jedit és a világ szélén clampel — a jedi ilyenkor nem a képernyő közepén látszik.
-- Sziklák és dekor véletlenszerűen generálódnak a világban (a kezdőpont körül szabad zóna, világszéli sáv, minimális hézag közöttük).
-- **5 drágakő** (◆) van egyszerre a világban. Felvétel: **100 pont**. Amint mind az 5-öt begyűjtötted, 5 új kő jelenik meg — mindig a jelenlegi látómezőn kívül, sosem a szemed előtt. A HUD bal oldalán a `◆ n/5` számláló mutatja az állást.
-- A katonák és a jedi tesztelt „képernyőn van" fogalma a világban a **látómezőre** (kamera + 128×128) vonatkozik, nem a teljes világra; a jeditől 200 px-nél messzebb lemaradt katonák szó nélkül eltűnnek.
+- The world is 512×512 px (4×4 screens); the Jedi starts at the center. The camera follows the Jedi and clamps at the world edges — the Jedi is then no longer centered on screen.
+- Rocks and decoration spawn randomly across the world (with a clear zone around the start point, a border strip, and minimum spacing between them). Each terrain object type — small rock, big rock, pebbles, crack, bones, dry bush — has 3 sprite variants, chosen at random when generated, so the world doesn't look uniformly tiled.
+- **5 gems** (◆) exist in the world at any time. Picking one up is worth **100 points**. Once all 5 are collected, 5 new ones appear — always outside the current view, never right in front of you. The HUD's left side shows a `◆ n/5` counter.
+- The "on screen" test for troopers and the Jedi refers to the **viewport** (camera + 128×128), not the whole world; troopers left more than 200 px behind the Jedi disappear silently.
 
-## Játékmenet
+## Gameplay
 
-- A katonák a látómezőn kívülről érkeznek, közelítenek a jedi felé, megállási távolságukon megállnak, telegráfolnak, majd lőnek.
-- **Blokk:** amíg ❎ nyomva van (és nem suhintasz), a jedi a nézési irányába néző kúpban véd. A kúpot a lövedék **pozíciója** dönti el, nem a sebességvektora.
-- **Suhintás (🅾️):** 8 frame hosszú, a 3.–7. frame-ben talál; a nézési irány előtti kúpban lévő katonákat (és Vadert) megöli, a lövedékeket is visszaveri.
-- **Visszavert lövés szórása:** 30% eséllyel pontosan a lövő katona felé (vagy ha az már halott, a sebességvektor negáltja irányában) repül; a maradék 70%-nál ez az irány **pontosan ±10°**-kal el van forgatva (véletlen oldalra). A visszavert lövés bármely élő katonát megöl, Vadert nem (szikrázva megsemmisül rajta).
-- **Nehézség:** az egyszerre élő katonák maximuma az első 20 másodpercben 1, majd 20 másodpercenként +1, legfeljebb 8-ig. A későbbi katonák közelebb állnak meg és gyorsabban mozognak.
-- **Életerő:** 3 találat; találat után kb. 1,5 másodperc sérthetetlenség (villogással) — ez alatt a blokk továbbra is működik. A 3. találat után game over, a rekord `cartdata`-ban mentődik.
+- Troopers arrive from outside the viewport, approach the Jedi, stop at their standoff distance, telegraph, then fire.
+- **Block:** while ❎ is held (and you're not swinging), the Jedi defends in a cone facing their look direction. The cone is decided by the shot's **position**, not its velocity vector.
+- **Swing (🅾️):** 8 frames long, connects on frames 3–7; it kills troopers (and Vader) in the cone ahead of the look direction, and also deflects shots.
+- **Deflected shot spread:** 30% chance it flies exactly toward the trooper who fired it (or, if that trooper is already dead, in the negated direction of its velocity); the remaining 70% is rotated **exactly ±10°** off that (random side). A deflected shot kills any living trooper, but not Vader (it sparks and is destroyed on contact).
+- **Difficulty:** the maximum number of troopers alive at once is 1 for the first 20 seconds, then +1 every 20 seconds, up to 8. Later troopers stand closer and move faster.
+- **Health:** 3 hits; after a hit, about 1.5 seconds of invincibility (with flashing) — blocking still works during this window. The 3rd hit ends the run; the high score is saved to `cartdata`.
 
 ## Darth Vader
 
-- `g.kills` (kard + visszavert lövéses ölések, a kísérők is beleszámítanak) minden **15.** elérésekor (15, 30, 45, …) — ha épp nincs élő Vader — felbukkan Darth Vader **3 kísérő katonával**, és a zene átvált a Vader-indulóra.
-- Vader **lassabb** a jedinél (üldözhető/elfutható), közelharcban **piros kardot** használ. Megközelítve telegráfoz (~0,5 mp felemelt karddal), majd söpör.
-- **Kivédhető blokkolással:** ha ❎ nyomva van és a jedi Vader felé néz, a csapás pattanás (parry) — szikra + hang, nincs sebzés. Blokk nélkül a csapás sebez.
-- **5 kardtalálat** öli meg (mindegyik után ~1 mp tántorgás + sérthetetlenség, a jedi suhintása nem üt kétszer egy suhintásból). Lövedék (még a visszavert sem) nem sebzi.
-- Legyőzve: **300 pont**, a zene visszavált a főtémára. Egyszerre csak egy Vader lehet a világban.
-- HUD: amíg Vader él, a felső sáv alatt HP-pipek jelzik az életerejét.
+- Every 15th kill (`g.kills` — sword and deflected-shot kills, escorts included) — 15, 30, 45, … — if no Vader is currently alive, Darth Vader appears with **3 escort troopers**, and the music switches to the Vader march.
+- Vader is **slower** than the Jedi (can be outrun or chased down), uses a **red saber** in melee. When close, he telegraphs (~0.5 s with the saber raised), then sweeps.
+- **Parryable:** if ❎ is held and the Jedi faces Vader, the strike is parried — a spark and sound, no damage. Without blocking, the strike hits.
+- **5 saber hits** kill him (each followed by ~1 s of stagger + invincibility; the Jedi's swing doesn't hit twice from one swing). Shots (even deflected ones) don't damage him.
+- Defeated: **300 points**, music switches back to the main theme. Only one Vader can exist in the world at a time.
+- HUD: while Vader is alive, HP pips below the top bar show his remaining health.
 
-## Homokféreg
+## Sandworm
 
-- Csak a menet **60. másodperce** után „figyel": ha a jedi **20 másodpercnél tovább** egy kb. 40×40 px-es területen belül marad (nem mozdul ki belőle), **3 másodperces remegés** (talajrázás + porrészecskék) kezdődik.
-- **Menekülés:** ha a remegés alatt a jedi ≥ 20 px-re elmozdul a kitörési ponttól, a féreg üresen bukkan fel, és nem történik semmi.
-- Ha a jedi a kitörés pillanatában 20 px-en belül maradt, a féreg **azonnal megeszi** — ez **azonnali game over**, függetlenül az életerőtől. A game over képernyőn ilyenkor egy `EATEN BY A SANDWORM` sor jelenik meg.
-- Nincs vizuális előjelzés a figyelmeztetésen (remegés) kívül — állva maradni kockázatos.
+- The worm only starts watching after **20 seconds** into the run. If the Jedi stays within a roughly 40×40 px area (without moving out of it) for **10 seconds**, a **3-second tremor** begins (ground shake + dust particles). Earliest possible tremor: 30.0 s; earliest possible bite: ~33.3 s.
+- **Escape:** if the Jedi moves ≥ 20 px away from the strike point during the tremor, the worm surfaces empty and nothing happens.
+- If the Jedi is still within 20 px of the strike point at the moment it surfaces, the worm **eats immediately** — an instant game over regardless of remaining health. The game-over screen then shows an `EATEN BY A SANDWORM` line.
+- There's no visual warning besides the tremor itself — standing still for too long is risky.
 
-## Kardszínek és pontok
+## Sword colors and points
 
-- **Jedi kardja:** zöld (11) külső vonal, fehér (7) mag. A blokk/visszaverés szikrái is 11/7 színűek.
-- **Vader kardja:** piros (8) külső vonal, fehér (7) mag.
+- **Jedi's sword:** green (11) outline, white (7) core. Block/deflect sparks use the same 11/7 colors.
+- **Vader's sword:** red (8) outline, white (7) core.
 
-| Esemény | Pont |
+| Event | Points |
 |---|---|
-| Suhintásos ölés (katona) | 10 |
-| Visszavert lövéses ölés (katona) | 20 |
-| Drágakő felvétele | 100 |
-| Darth Vader legyőzése | 300 |
+| Sword kill (trooper) | 10 |
+| Deflected-shot kill (trooper) | 20 |
+| Gem pickup | 100 |
+| Defeating Darth Vader | 300 |
 
-A pontszám 32000-nél telítődik (v1-ből változatlan).
+The score caps at 32000 (unchanged since v1).
 
-## Zene és hang
+## Music and sound
 
-- Két **saját** kompozíció készült Star Wars-stílusban — nem a filmek eredeti dallamainak átirata, hanem a stílus szerzői jogi aggály nélküli, saját feldolgozása:
-  - **Főtéma** (music 0–3): hősies fanfár-jellegű dallam, szól a címképernyőn és a játék alatt (amíg Vader nincs jelen).
-  - **Vader-induló** (music 4–7): sötét, moll hangulatú induló, Vader felbukkanásakor váltja a főtémát, és Vader legyőzésekor vissza is vált rá.
-- A hangeffekt-készlet a v1 szettre épül, kiegészítve Vader (suhintás, kardösszecsapás, sérülés, halál), a homokféreg (földremegés, előbukkanás) és a drágakövek (felvétel, újratelepülés) hangjaival.
+- Two **original** compositions were written in a Star Wars-adjacent style — not transcriptions of the films' themes, but an original take on the style, free of copyright concerns:
+  - **Main theme** (music 0–3): a heroic fanfare-style melody, plays on the title screen and during play (whenever Vader isn't present).
+  - **Vader march** (music 4–7): a dark, minor-key march that replaces the main theme when Vader appears, and switches back when he's defeated.
+- The sound effect set builds on the v1 set, adding Vader (swing, saber clash, hit, death), the sandworm (ground rumble, surfacing), and gems (pickup, respawn) sounds.
 
-## Tesztelés
+## Testing
 
 ```bash
-bash tests/run_tests.sh        # a jedi/ mappából (bárhonnan: bash desert_strike/tests/run_tests.sh)
+bash tests/run_tests.sh        # from the desert_strike/ folder (or from anywhere: bash desert_strike/tests/run_tests.sh)
 ```
 
-Ez három lépést futtat, kilépőkód `0` = minden zöld:
+This runs three steps, exit code `0` = all green:
 
-1. **Headless tesztek** — a script végigmegy az összes `test_ds*.p8` carton (`pico8 -x <cart>` egy 90 másodperces `perl alarm` időkorláttal, mert egy szintaxishiba örökre lefagyasztaná a PICO-8 processzt), és a végén `TOTAL ok=N fail=M` sort ír. Bármelyik cart kimenetében `syntax error` / `runtime error` / `program too large` / `FAIL:` sor, vagy a `TESTS DONE ok=N fail=0` sor hiánya hibának számít. **Miért több cart?** Minden teszt-cart `#include`-dal behúzza a teljes játékkódot, és a PICO-8 8192 tokenes limitje cartonként érvényes — a játék + az összes teszt egy cartban nem fér el. Új tesztesetet a legkisebb cartba (vagy új `test_ds_<x>.p8`-ba) érdemes tenni; a tesztkód cartonként kb. 900 token alatt maradjon.
-2. **`shrinko8 <cart> --count`** — token- és tömörített méret kiírása; 8192 tokent meghaladva hibázik. Jelenleg a cart **~5040 token** (62%) és **~7215 byte** (46%) tömörítve.
-3. **`shrinko8 <cart> --lint`** — figyelmeztetések kiírása (nem blokkoló).
+1. **Headless tests** — the script runs every `test_ds*.p8` cart (`pico8 -x <cart>` under a 90-second `perl alarm`, since a syntax error would freeze the PICO-8 process forever), then prints a `TOTAL ok=N fail=M` line. Any `syntax error` / `runtime error` / `program too large` / `FAIL:` line in a cart's output, or a missing `TESTS DONE ok=N fail=0` line, counts as a failure. Add new test cases to the smallest cart (or a new `test_ds_<x>.p8`); keep each test cart's code under roughly 900 tokens.
+2. **`shrinko8 <cart> --count`** — prints token and compressed size; fails above 8192 tokens.
+3. **`shrinko8 <cart> --lint`** — prints warnings (non-blocking).
 
-**Előfeltételek:** a PICO-8 binárisnak a `/Applications/PICO-8.app/Contents/MacOS/pico8` úton kell lennie; a `shrinko8` futtatásához `uv`/`uvx` szükséges (`uvx --from git+https://github.com/thisismypassport/shrinko8 shrinko8 ...`).
+Currently **11 test carts**, totalling **566 test cases**, all green; the cart itself is **~5280 tokens** (64%) and **~7970 bytes** (52%) compressed.
 
-### A teszt-cartok szerkezete (`test_lib.lua` + `test_ds*.p8`)
+**Prerequisites:** the PICO-8 binary must be at `/Applications/PICO-8.app/Contents/MacOS/pico8`; running `shrinko8` requires `uv`/`uvx` (`uvx --from git+https://github.com/thisismypassport/shrinko8 shrinko8 ...`).
 
-A teszt-cartok a `tests/` almappában élnek; mind `#include ../desert_strike.p8`-tal húzza be a játék kódját (a `#include` csak a cart fájlhoz képest relatív utat fogad el), majd `#include test_lib.lua`-val a közös harnesst. A harness:
+### Test cart structure (`test_lib.lua` + `test_ds*.p8`)
 
-- felülírja a `btn`/`btnp` függvényeket egy `keys` táblából olvasó stubbal (a tesztek soha nem nyúlnak a valódi inputhoz), valamint a `music`/`sfx` függvényeket egy naplózó stubbal (`music_log`, `sfx_log` táblák — így a zene-váltás és a hangeffektek is ellenőrizhetők a tesztekben anélkül, hogy valódi hang szólna),
-- definiál egy kis harnesst: `tcase(name)` jelöli az aktuális tesztesetet, `check(cond, msg)` gyűjti a PASS/FAIL-t (`printh("FAIL: ...")`-tal riportol hiba esetén), `step(n, keys)` `n` frame-et léptet (minden frame-ben `_update` **és** `_draw` is fut, hogy a rajzoló-kód futásidejű hibáit is elkapja), `fresh(seed)`/`arena()` determinisztikus új menetet indít (`srand`, sziklák/spawnok kikapcsolva), `mk_trooper`/`mk_bolt` kézzel tesz be entitásokat a `g` táblába,
-- a cartok saját `_init()`-je futtatja a teszteseteket: `test_ds.p8` … `test_ds_e.p8` a v1 esetek (világkoordinátákra átírva: mozgás/fordulás/clamp 4..508, szikla-ütközés, spawn–közelítés–telegráf–lövés, találat/inv, blokk-kúp, suhintás-ölés, visszaverés, `max_alive` ramp, game over/retry, sziklagenerálás szabályai, lövedék-életciklus, pontszám-telítés stb.); `test_ds_v2.p8`, `test_ds_v2b.p8` a v2 alapesetek (kamera, világ/gem-generálás, `spawn_pos`, lemaradt katona, visszaverés-szórás, drágakövek, zene-napló); `test_ds_v2c.p8`, `test_ds_v2d.p8` a Vader-küszöb, kísérők, mozgás/telegráf/csapás/parry, sebzés/stagger/halál és lövedék-elnyelés esetei; `test_ds_v2e.p8` a homokféreg 60 mp-es kapuja, 600 frame mozdulatlansága, remegés/előbukkanás/süllyedés, megevés → `EATEN BY A SANDWORM`, menekülés és harapási sugár esetei,
-- a végén `finish()` írja ki a `TESTS DONE ok=... fail=...` sort és `extcmd("shutdown")`-nal zárja a futást.
+The test carts live in `tests/`; each `#include`s `../desert_strike.p8` to pull in the game code (`#include` paths are relative to the cart file), then `#include test_lib.lua` for the shared harness. The harness:
 
-Jelenleg **10 teszt-cart**, összesen **553 futó teszteset**, mind zöld.
+- overrides `btn`/`btnp` with a stub reading from a `keys` table (tests never touch real input), and overrides `music`/`sfx` with logging stubs (`music_log`, `sfx_log` tables — so music switches and sound effects can be asserted on without any sound actually playing),
+- defines a small harness: `tcase(name)` marks the current test case, `check(cond, msg)` collects PASS/FAIL (reporting failures via `printh("FAIL: ...")`), `step(n, keys)` advances `n` frames (running both `_update` and `_draw` each frame, so drawing-code runtime errors are also caught), `fresh(seed)`/`arena()` starts a deterministic fresh run (`srand`, rocks/spawns disabled), `mk_trooper`/`mk_bolt` manually insert entities into the `g` table,
+- each cart's own `_init()` runs its test cases: `test_ds.p8` … `test_ds_e.p8` are the v1 cases (rewritten for world coordinates: movement/turning/clamp 4..508, rock collision, spawn–approach–telegraph–fire, hit/invincibility, block cone, sword kill, deflection, `max_alive` ramp, game over/retry, rock generation rules, shot lifecycle, score cap, etc.); `test_ds_v2.p8`, `test_ds_v2b.p8` cover the v2 base cases (camera, world/gem generation, `spawn_pos`, left-behind troopers, deflection spread, gems, music log); `test_ds_v2c.p8`, `test_ds_v2d.p8` cover the Vader threshold, escorts, movement/telegraph/strike/parry, damage/stagger/death, and shot-absorption cases; `test_ds_v2e.p8` covers the sandworm's gating, stillness window, tremor/surface/sink, being eaten (`EATEN BY A SANDWORM`), escaping, and bite radius; `test_ds_v3.p8` covers the v2.1 cases (terrain sprite variants, the 20 s + 10 s worm timing, and the title image cache),
+- at the end, `finish()` prints the `TESTS DONE ok=... fail=...` line and calls `extcmd("shutdown")` to end the run.
 
-## Fájlok
+## Files
 
 ```
 carts/desert_strike/
-  desert_strike.p8            a játék (önálló cart: __lua__ + __gfx__ + __sfx__ + __music__)
-  README.md          ez a fájl
+  desert_strike.p8       the game (self-contained cart: __lua__ + __gfx__ + __sfx__ + __music__)
+  README.md              this file
   tests/
-    run_tests.sh       teszt + token-limit + lint futtató (végigmegy az összes test_ds*.p8-on)
-    test_lib.lua       közös teszt-harness (#include-olva minden teszt-cartba)
-    test_ds.p8       v1 alapesetek
-    test_ds_b.p8     v1 esetek (folyt.)
-    test_ds_c.p8     v1 esetek (folyt.)
-    test_ds_d.p8     v1 esetek (folyt.)
-    test_ds_e.p8     v1 esetek (folyt.)
-    test_ds_v2.p8    v2: kamera, világgenerálás, spawn
-    test_ds_v2b.p8   v2: szórás, drágakövek, zene-napló
-    test_ds_v2c.p8   v2: Vader-küszöb, kísérők, mozgás/telegráf
-    test_ds_v2d.p8   v2: Vader sebzés/stagger/halál, lövedék-elnyelés
-    test_ds_v2e.p8   v2: homokféreg
-  assets/            külső assetek (referenciaképek stb.), a cart nem tölti be
+    run_tests.sh         test + token-limit + lint runner (runs every test_ds*.p8)
+    test_lib.lua         shared test harness (#include-d by every test cart)
+    test_ds.p8           v1 base cases
+    test_ds_b.p8         v1 cases (cont.)
+    test_ds_c.p8         v1 cases (cont.)
+    test_ds_d.p8         v1 cases (cont.)
+    test_ds_e.p8         v1 cases (cont.)
+    test_ds_v2.p8        v2: camera, world generation, spawning
+    test_ds_v2b.p8       v2: deflection spread, gems, music log
+    test_ds_v2c.p8       v2: Vader threshold, escorts, movement/telegraph
+    test_ds_v2d.p8       v2: Vader damage/stagger/death, shot absorption
+    test_ds_v2e.p8       v2: sandworm
+    test_ds_v3.p8        v2.1: terrain variants, worm timing, title image
+  assets/                external assets (reference images, poster art, etc.) — not loaded by the cart
   archive/
-    jedi-v1.p8         a v1 cart érintetlen mentése (ne módosítsd)
-    test_ds-v1.p8    a v1 teszt-cart érintetlen mentése (ne módosítsd)
-  docs/specs/2026-09-16-desert-jedi-design.md    v1 spec
-  docs/specs/2026-09-17-desert-jedi-v2-design.md v2 spec
-  docs/plans/2026-09-16-desert-jedi-plan.md      v1 implementációs terv
-  docs/plans/2026-09-17-desert-jedi-v2-plan.md   v2 implementációs terv
+    jedi-v1.p8           untouched snapshot of the v1 cart (do not modify)
+    test_jedi-v1.p8      untouched snapshot of the v1 test cart (do not modify)
+  docs/specs/2026-09-16-desert-jedi-design.md         v1 design spec
+  docs/specs/2026-09-17-desert-jedi-v2-design.md      v2 design spec
+  docs/specs/2026-09-17-desert-strike-v2.1-design.md  v2.1 design spec
+  docs/plans/2026-09-16-desert-jedi-plan.md           v1 implementation plan
+  docs/plans/2026-09-17-desert-jedi-v2-plan.md        v2 implementation plan
+  docs/plans/2026-09-17-desert-strike-v2.1-plan.md    v2.1 implementation plan
 ```
 
-A `desert_strike.p8` kódja tabokra van bontva (`-->8` elválasztókkal): **main** (konstansok, `_init`/`_update`/`_draw`, `g` állapottábla), **world** (sziklák, dekoráció, ütközés, `spawn_pos`), **player** (a jedi, `upd_gems`), **troopers**, **vader** (Darth Vader állapotgépe), **bolts** (lövedékek, `deflect`), **worm** (homokféreg), **fx + hud**.
+`desert_strike.p8`'s code is split into tabs (`-->8` separators): **main** (constants, `_init`/`_update`/`_draw`, the `g` state table), **world** (rocks, decoration, collision, `spawn_pos`), **player** (the Jedi, `upd_gems`), **troopers**, **vader** (Darth Vader's state machine), **bolts** (shots, `deflect`), **worm** (the sandworm), **fx + hud**.
 
-## Kapcsolódó dokumentumok
+## Related documents
 
 - v1 design spec: [`docs/specs/2026-09-16-desert-jedi-design.md`](docs/specs/2026-09-16-desert-jedi-design.md)
-- v1 implementációs terv: [`docs/plans/2026-09-16-desert-jedi-plan.md`](docs/plans/2026-09-16-desert-jedi-plan.md)
+- v1 implementation plan: [`docs/plans/2026-09-16-desert-jedi-plan.md`](docs/plans/2026-09-16-desert-jedi-plan.md)
 - v2 design spec: [`docs/specs/2026-09-17-desert-jedi-v2-design.md`](docs/specs/2026-09-17-desert-jedi-v2-design.md)
-- v2 implementációs terv: [`docs/plans/2026-09-17-desert-jedi-v2-plan.md`](docs/plans/2026-09-17-desert-jedi-v2-plan.md)
+- v2 implementation plan: [`docs/plans/2026-09-17-desert-jedi-v2-plan.md`](docs/plans/2026-09-17-desert-jedi-v2-plan.md)
+- v2.1 design spec: [`docs/specs/2026-09-17-desert-strike-v2.1-design.md`](docs/specs/2026-09-17-desert-strike-v2.1-design.md)
+- v2.1 implementation plan: [`docs/plans/2026-09-17-desert-strike-v2.1-plan.md`](docs/plans/2026-09-17-desert-strike-v2.1-plan.md)
+
+## License
+
+CC BY-NC-SA 4.0, © Peter Kepes — see [`../LICENSE`](../LICENSE).
