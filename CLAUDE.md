@@ -1,40 +1,40 @@
-# PICO-8 carts — projekt-szabályok
+# PICO-8 carts — project rules
 
-Ez a mappa a PICO-8 cart-könyvtár (`~/Library/Application Support/pico-8/carts`), git repóként kezelve. A gyári `demos/` mappa `.gitignore`-ban van.
+This folder is the PICO-8 cart directory (`~/Library/Application Support/pico-8/carts`), managed as a git repository. The factory `demos/` folder is in `.gitignore`.
 
-## Mappaszerkezet
+## Directory layout
 
 ```
 carts/
-  CLAUDE.md                     ez a fájl
-  README.md, LICENSE            a gyűjtemény leírása (angol) és a CC BY-NC-SA 4.0 licenc
-  .claude/skills/pico8-programming/   PICO-8 fejlesztői tudás (headless futtatás, formátum, teszt-harness, buktatók)
-  <játék>/
-    <játék>.p8                  a cart — önálló (kód + gfx + sfx + music), nincs benne #include
-    tests/                      test_lib.lua, test_*.p8 (#include ../<játék>.p8), run_tests.sh
-    assets/                     külső assetek: referenciaképek, hang-/zeneforrások, generátor-scriptek — a cart nem tölti be
-    docs/specs/     design spec-ek (YYYY-MM-DD-<téma>-design.md)
-    docs/plans/     implementációs tervek
-    archive/                    (opcionális) git előtti régi verziók; új verziót git-tel verziózunk, nem ide
-  demos/                        gyári demók, nem verziózott
+  CLAUDE.md                     this file
+  README.md, LICENSE            collection overview (English) and the CC BY-NC-SA 4.0 license
+  .claude/skills/pico8-programming/   PICO-8 development know-how (headless runs, cart format, test harness, gotchas)
+  <game>/
+    <game>.p8                   the cart — self-contained (code + gfx + sfx + music), no #include inside
+    tests/                      test_lib.lua, test_*.p8 (#include ../<game>.p8), run_tests.sh
+    assets/                     external assets: reference images, sound/music sources, generator scripts — never loaded by the cart
+    docs/specs/                 design specs (YYYY-MM-DD-<topic>-design.md)
+    docs/plans/                 implementation plans
+    archive/                    (optional) pre-git versions; new versions are versioned with git, not here
+  demos/                        factory demos, not versioned
 ```
 
-Jelenlegi játék: `desert_strike/` (Desert Strike, korábban Desert Jedi; v2). Új játék = új almappa ugyanezzel a szerkezettel.
+Current game: `desert_strike/` (Desert Strike, formerly Desert Jedi; v2.1). A new game = a new subfolder with the same layout.
 
-## Fejlesztés
+## Development
 
-- **Cart-munka előtt töltsd be a `pico8-programming` skillt** (`.claude/skills/pico8-programming/SKILL.md`): headless futtatás időkorláttal, `#include` korlátok, 8192 tokenes limit, sprite-átlátszóság, teszt-harness. Ne fedezd fel újra.
-- PICO-8 bináris: `/Applications/PICO-8.app/Contents/MacOS/pico8`. **Soha ne nyiss PICO-8 ablakot** automatizált munkában; `pico8 -x` headless módban fut.
-- Bemenet a cartban kizárólag `btn()`/`btnp()` (a tesztek stubolják).
-- **Nyelv:** minden `README.md`, a kód-kommentek (cart, tesztek, scriptek) és a skill **angolul**; a `docs/specs`, `docs/plans` és ez a CLAUDE.md magyarul; játékszövegek angolul.
-- **Spec/terv útvonal (projekt-felülírás):** `docs/specs/` és `docs/plans/` — nem `docs/superpowers/...`.
-- **Licenc:** CC BY-NC-SA 4.0 (`LICENSE` a gyökérben, szerző Peter Kepes); új program README-jébe kerüljön licenc-sor.
-- Sprite-részletekhez ne használd a pálya háttérszínét, és ne javíts `pal()`-lal futásidőben — a sprite-ba fesd a jó színt.
+- **Load the `pico8-programming` skill before any cart work** (`.claude/skills/pico8-programming/SKILL.md`): headless runs with a timeout, `#include` limits, the 8192-token limit, sprite transparency, test harness. Do not rediscover these.
+- PICO-8 binary: `/Applications/PICO-8.app/Contents/MacOS/pico8`. **Never open a PICO-8 window** during automated work; `pico8 -x` runs headless.
+- Input in the cart only through `btn()`/`btnp()` (the tests stub them).
+- **Language:** every `README.md`, all code comments (cart, tests, scripts), this file and the skill are in **English**; `docs/specs` and `docs/plans` are in Hungarian; in-game text is English.
+- **Spec/plan paths (project override):** `docs/specs/` and `docs/plans/` — not `docs/superpowers/...`.
+- **License:** CC BY-NC-SA 4.0 (`LICENSE` in the root, author Peter Kepes); every program's README gets a license line.
+- Do not use the playfield background colour for sprite details, and do not patch colours with `pal()` at draw time — paint the right colour into the sprite.
 
-## Tesztelés és commit
+## Testing and commits
 
-- Tesztek: `bash <játék>/tests/run_tests.sh` (headless tesztek + shrinko8 token-limit + lint; 0 = zöld).
-- Ha `.p8`/`.lua` változott → commit előtt a játék teszt-suite-ja fusson és legyen zöld. Csak doksi/asset változásnál nincs teszt.
-- **Ebben a repóban a `main`-re közvetlen commit rendben van** (egyszemélyes hobbi-projekt; felülírja a globális „ne commitolj main-re" defaultot). Push továbbra is csak a felhasználó kezéből.
-- Nincs CI: a PICO-8 bináris licencelt, nyilvános CI-ban nem futtatható; a lokális `run_tests.sh` az egyetlen védőháló.
-- Commit message: tömör, a változásról; Claude-attribúció nélkül.
+- Tests: `bash <game>/tests/run_tests.sh` (headless tests + shrinko8 token limit + lint; exit 0 = green).
+- If a `.p8`/`.lua` file changed, run the game's test suite before committing and require green. Docs/asset-only changes need no test run.
+- **Committing directly to `main` is fine in this repository** (single-developer hobby project; overrides the global "do not commit to main" default). Pushing stays in the user's hands.
+- No CI: the PICO-8 binary is licensed and cannot run on public CI; the local `run_tests.sh` is the only safety net.
+- Commit messages: concise, about the change; no Claude attribution.
