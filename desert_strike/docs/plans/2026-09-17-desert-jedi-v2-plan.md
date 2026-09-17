@@ -4,11 +4,11 @@
 
 **Goal:** A v1 cartot görgetett 512×512-es világgá bővíteni Darth Vader főellenséggel, homokféreggel, drágakövekkel, új zenével, módosított visszaverés-szórással és új kardszínekkel — tesztelve, a PICO-8 limiteken belül.
 
-**Architecture:** A meglévő `jedi.p8` kódja marad a váz (tab-ok, `g` tábla, kontrakt-nevek); a világkoordináták + kamera bevezetése átvág mindenen, ezért az első kód-agent ezt csinálja, a további kettő ráépít (Vader, féreg). A sprite- és hang-agent a `src/` fájlokba dolgozik párhuzamosan, az összefűzés a v1 recept szerint.
+**Architecture:** A meglévő `desert_strike.p8` kódja marad a váz (tab-ok, `g` tábla, kontrakt-nevek); a világkoordináták + kamera bevezetése átvág mindenen, ezért az első kód-agent ezt csinálja, a további kettő ráépít (Vader, féreg). A sprite- és hang-agent a `src/` fájlokba dolgozik párhuzamosan, az összefűzés a v1 recept szerint.
 
 **Tech Stack:** PICO-8 0.2.x, shrinko8 (`uvx --from git+https://github.com/thisismypassport/shrinko8 shrinko8`), Python 3 + Pillow (`uv run --with pillow`).
 
-**Spec:** `docs/superpowers/specs/2026-09-17-desert-jedi-v2-design.md` (+ a v1 spec és v1 plan a kontraktért, harnessért és a .p8 formátumért: `2026-09-16-desert-jedi-design.md`, `2026-09-16-desert-jedi-plan.md`).
+**Spec:** `docs/specs/2026-09-17-desert-jedi-v2-design.md` (+ a v1 spec és v1 plan a kontraktért, harnessért és a .p8 formátumért: `2026-09-16-desert-jedi-design.md`, `2026-09-16-desert-jedi-plan.md`).
 
 ## Tartalomjegyzék
 
@@ -40,13 +40,13 @@
 
 | Fájl | Változás | Ki |
 |---|---|---|
-| `jedi.p8` `__lua__` | világ/kamera/gem/szórás/kardszín → Vader/zene → féreg | A1 → A2 → A3, később F |
-| `test_lib.lua` + `test_jedi.p8`, `test_jedi_b..e.p8`, `test_jedi_v2.p8`, `test_jedi_v2b..e.p8` | közös harness + v1 tesztek világkoordinátákra + v2 esetek, cartonként ≤ ~900 token teszt-kód (a játék + tesztek együtt nem férnek egy cartba) | A1, A2, A3, F |
+| `desert_strike.p8` `__lua__` | világ/kamera/gem/szórás/kardszín → Vader/zene → féreg | A1 → A2 → A3, később F |
+| `test_lib.lua` + `test_ds.p8`, `test_ds_b..e.p8`, `test_ds_v2.p8`, `test_ds_v2b..e.p8` | közös harness + v1 tesztek világkoordinátákra + v2 esetek, cartonként ≤ ~900 token teszt-kód (a játék + tesztek együtt nem férnek egy cartba) | A1, A2, A3, F |
 | `run_tests.sh` | változatlan (max. a tokenszám-kiírás) | – |
 | `src/gfx.txt` | a jelenlegi `__gfx__` 128 sora + új sprite-ok | B |
 | `src/sfx.txt`, `src/music.txt` | teljes csere: sfx 0–7 v1, 8–15 új, 16–39 zene | C |
 | `README.md` | v2 szekciók | G |
-| `docs/superpowers/…` | v2 spec/plan (kész) | – |
+| `docs/…` | v2 spec/plan (kész) | – |
 
 ## Megvalósítási sorrend táblázat
 
@@ -67,18 +67,18 @@
 
 ## Task 1: Világ + kamera + drágakövek + szórás + kardszín (A1)
 
-**Files:** Modify `jedi.p8` (`__lua__`), `test_jedi.p8`.
+**Files:** Modify `desert_strike.p8` (`__lua__`), `test_ds.p8`.
 
 **Interfaces:** Produces `world_w/world_h`, `g.cam_x/cam_y`, `upd_cam()`, `in_view(x,y,m)`, `spawn_pos()`, `spawn_trooper_at(x,y)`, `gen_gems(n,outside)`, `upd_gems()`, `g.kills` (számláló – A2 használja), `g.gems`, `g.gems_got`, `draw_saber(x,y,fx,fy,col,mode)`-szerű újrafelhasználható kard-rajz (A2 Vader kardjához), `sfx_log`/`music_log` stub a harnessben.
 
-- [ ] **Step 1 (harness):** a `test_jedi.p8`-ban a `#include` után: `music_log,sfx_log={},{}` és `function music(n) add(music_log,n) end function sfx(n) add(sfx_log,n) end` (a játék hívásai így naplózódnak). `fresh()` marad, de a jedi a világ közepén indul.
+- [ ] **Step 1 (harness):** a `test_ds.p8`-ban a `#include` után: `music_log,sfx_log={},{}` és `function music(n) add(music_log,n) end function sfx(n) add(sfx_log,n) end` (a játék hívásai így naplózódnak). `fresh()` marad, de a jedi a világ közepén indul.
 - [ ] **Step 2 (piros tesztek):** v2 spec 13. 1–6. és 11–12. esetei `tcase` blokkokban; a v1 esetek átírása: clamp `508`, „képernyő" → `in_view`; a 12. v1-teszt (sziklák) a v2 számokkal (80–120 db, 40×40 a (256,256) körül, 10 px szélsáv).
 - [ ] **Step 3 (kód):** `world_w=512 world_h=512`; `g.cam_x,cam_y`; `upd_cam()`; `_draw`-ban `camera(g.cam_x+sx, g.cam_y+sy)` a világ rajzolásához, `camera()` a HUD előtt; culling `in_view(x,y,16)` dekorra, sziklára, hullára, gemre; `solid/in_rock` elején olcsó távolság-szűrő; `gen_rocks/gen_decor` v2 darabszámokkal; `spawn_pos()`; `spawn_trooper` → `spawn_pos`; `spawn_trooper_at`; `despawn_far` az `upd_troopers`-ben; katona `vis` = `in_view(tr.x,tr.y,0)`; lövedék-törlés `not in_view(b.x,b.y,16) or világon kívül`; `gen_gems`, `upd_gems`, gem rajz (44/45), HUD `◆ n/5`; `deflect` 30/70 szórás (`DEFL_EXACT`, `DEFL_DEV`); kardszín 11 + szikrák 11/7; cím felirat 11; `g.kills` növelése `kill_trooper`-ben.
 - [ ] **Step 4:** `bash run_tests.sh` → ALL GREEN; tokenszám a riportba.
 
 ## Task 2: Darth Vader + zene-váltás (A2)
 
-**Files:** Modify `jedi.p8`, `test_jedi.p8`.
+**Files:** Modify `desert_strike.p8`, `test_ds.p8`.
 
 **Interfaces:** Consumes A1 neveit. Produces `g.vader`, `g.next_vader`, `spawn_vader()`, `upd_vader()`, `hit_vader()`, `draw_vader()`, HUD-pipek, `music(4)`/`music(0)` váltás.
 
@@ -88,7 +88,7 @@
 
 ## Task 3: Homokféreg (A3)
 
-**Files:** Modify `jedi.p8`, `test_jedi.p8`.
+**Files:** Modify `desert_strike.p8`, `test_ds.p8`.
 
 **Interfaces:** Produces `g.worm`, `upd_worm()`, `draw_worm()`, `g.cause`, `p.eaten`, game over sor.
 
@@ -100,26 +100,26 @@
 
 **Files:** Create `src/gfx.txt` (128 × 128 hex). Scratchpad: `gfx_preview.py`.
 
-- [ ] **Step 1:** a jelenlegi `__gfx__` szekció kiemelése: `awk '/^__gfx__/{f=1;next}/^__sfx__/{f=0}f' jedi.p8 > src/gfx.txt` — ez a kiindulás; a v1 sorok **pixelre** változatlanok maradnak.
+- [ ] **Step 1:** a jelenlegi `__gfx__` szekció kiemelése: `awk '/^__gfx__/{f=1;next}/^__sfx__/{f=0}f' desert_strike.p8 > src/gfx.txt` — ez a kiindulás; a v1 sorok **pixelre** változatlanok maradnak.
 - [ ] **Step 2:** új sprite-ok a v2 spec 11. szerint: Vader 24–27 (felső) + 40–43 (alsó), 8×16, **háttér 3-as szín** (nem 0!), fekete test; gem 44/45; féreg A/B 32×32 a 4–7. sprite-sorokban (64–67/80–83/96–99/112–115 és 68–71/84–87/100–103/116–119).
-- [ ] **Step 3:** preview PNG (v1 recept: 8× nagyítás, 0 = homok, rács; **Vadernél a 3-as színt is homokként** rajzold, hogy a fekete test látszódjon), Read-del megnézve, ≥ 2 iteráció; ellenőrzés: 128 sor × 128 hex, és `diff <(awk '/^__gfx__/{f=1;next}/^__sfx__/{f=0}f' jedi.p8 | head -32) <(head -32 src/gfx.txt)` **üres** (a v1 sorok 0–31 érintetlenek) — kivéve a 24–27/40–43-as sprite-ok oszlopai (192–223 px) a 8–23. sorokban és a 44–45 (352–367 px) a 16–23. sorokban: csak ezeken a téglalapokon változhat valami.
+- [ ] **Step 3:** preview PNG (v1 recept: 8× nagyítás, 0 = homok, rács; **Vadernél a 3-as színt is homokként** rajzold, hogy a fekete test látszódjon), Read-del megnézve, ≥ 2 iteráció; ellenőrzés: 128 sor × 128 hex, és `diff <(awk '/^__gfx__/{f=1;next}/^__sfx__/{f=0}f' desert_strike.p8 | head -32) <(head -32 src/gfx.txt)` **üres** (a v1 sorok 0–31 érintetlenek) — kivéve a 24–27/40–43-as sprite-ok oszlopai (192–223 px) a 8–23. sorokban és a 44–45 (352–367 px) a 16–23. sorokban: csak ezeken a téglalapokon változhat valami.
 
 ## Task 5: SFX + zene v2 (C)
 
 **Files:** Create `src/sfx.txt` (64 × 168), `src/music.txt` (64 sor). Scratchpad: `check_audio.py`, `play.p8`.
 
-- [ ] **Step 1:** a jelenlegi `__sfx__` 0–7 sorainak kiemelése és megtartása (`awk '/^__sfx__/{f=1;next}/^__music__/{f=0}f' jedi.p8 | head -8`).
+- [ ] **Step 1:** a jelenlegi `__sfx__` 0–7 sorainak kiemelése és megtartása (`awk '/^__sfx__/{f=1;next}/^__music__/{f=0}f' desert_strike.p8 | head -8`).
 - [ ] **Step 2:** új SFX 8–15 a v2 spec 9. szerint.
 - [ ] **Step 3:** **Főtéma** 16–27 (minta 0–3, 3 csatorna: dallam / ellenszólam / basszus+ütős) és **Vader-induló** 28–39 (minta 4–7) — mindkettő **saját** dallam a spec 9. stílusleírásával; a `__music__` 8 sora pontosan a spec szerint (`01 10111244` … `02 25262744`), a többi `00 41424344`. A 8–11 v1 zene-slotok tartalma felülírható (nem használt többé).
 - [ ] **Step 4:** `check_audio.py` + `play.p8` (`music(0)` 60 frame, `music(4)` 60 frame, `sfx(8..15)`), headless `AUDIO OK`. Az összefoglalóban mindkét téma dallama hangnevekkel, és egy mondat arról, hogy miben tér el az eredeti Williams-témáktól (nem idézi).
 
 ## Task 6: Összefűzés (D)
 
-Mint v1 Task 4: `__lua__` kód megtartása + `src/gfx.txt` + `src/sfx.txt` + `src/music.txt` → `jedi.p8`; számok ellenőrzése (128/64/64); `bash run_tests.sh` ALL GREEN; 10 mp headless futás; `rm -r src/`.
+Mint v1 Task 4: `__lua__` kód megtartása + `src/gfx.txt` + `src/sfx.txt` + `src/music.txt` → `desert_strike.p8`; számok ellenőrzése (128/64/64); `bash run_tests.sh` ALL GREEN; 10 mp headless futás; `rm -r src/`.
 
 ## Task 7: Verifikáció (E1–E5)
 
-Mint v1 Task 5, v2 tartalommal. Findings-formátum azonos (high/medium/low + evidence + suggested_fix). **Segéd-cart szabály:** a `jedi.p8` másolata a scratchpadbe, `#include jedi.p8`, **és** a `__gfx__`-től a fájl végéig terjedő szekciók a segéd-cart végére másolva (`sed -n '/^__gfx__$/,$p' jedi.p8 >> helper.p8`), különben üres a sprite-lap.
+Mint v1 Task 5, v2 tartalommal. Findings-formátum azonos (high/medium/low + evidence + suggested_fix). **Segéd-cart szabály:** a `desert_strike.p8` másolata a scratchpadbe, `#include desert_strike.p8`, **és** a `__gfx__`-től a fájl végéig terjedő szekciók a segéd-cart végére másolva (`sed -n '/^__gfx__$/,$p' desert_strike.p8 >> helper.p8`), különben üres a sprite-lap.
 
 - **E1:** `run_tests.sh`; token > 7000 medium; `archive/` létezik és érintetlen (md5 azonos a `archive/jedi-v1.p8`-ra a futás előtt/után — az archívumot senki nem írhatja).
 - **E2:** képernyőképek a v2 spec 15.2 (a)–(g) listája szerint: cím; görgetés (jedi a világ sarkában, `cam` clampel); Vader + 3 kísérő + piros kard + HP-pipek (Vader kézzel: `spawn_vader()` után `g.vader.x,y` a jedi mellé 20 px-re); windup póz; remegés (`g.worm.st="tremor"`); féreg B-frame; gem a látómezőben + `◆` számláló; game over `EATEN BY A SANDWORM`. Értékelés: Vader fekete, sisak/fény felismerhető, nem lyukas (a 3-as háttér átlátszó, a 0 nem); féreg gyűrűs, fogak; gem csillog; kardszínek zöld/piros.
@@ -137,10 +137,10 @@ Mint v1 Task 6: high + medium javítása tesztekkel, `ALL GREEN`, token ≤ 8192
 
 ## Dispatch promptok
 
-Közös fejléc mint v1 (útvonalak, headless-recept, alarm-wrapper, `#include` relatív, scratchpad, shrinko8), plusz: „Read the v2 spec fully, then the v1 spec §4–§8 and the v1 plan's 'Kanonikus kontrakt' + '.p8 fájlformátum jegyzet'. Read jedi.p8 and test_jedi.p8 before editing." Minden prompt végén ≤ 120 szavas összefoglaló kérés.
+Közös fejléc mint v1 (útvonalak, headless-recept, alarm-wrapper, `#include` relatív, scratchpad, shrinko8), plusz: „Read the v2 spec fully, then the v1 spec §4–§8 and the v1 plan's 'Kanonikus kontrakt' + '.p8 fájlformátum jegyzet'. Read desert_strike.p8 and test_ds.p8 before editing." Minden prompt végén ≤ 120 szavas összefoglaló kérés.
 
 - **A1:** „Execute Task 1 (A1). Start with the harness change and the red tests, then implement. Keep every existing test (rewritten to world coordinates), finish ALL GREEN, report tokens."
-- **A2:** „Execute Task 2 (A2) on top of A1's code (read the current jedi.p8 first). Red tests first. ALL GREEN."
+- **A2:** „Execute Task 2 (A2) on top of A1's code (read the current desert_strike.p8 first). Red tests first. ALL GREEN."
 - **A3:** „Execute Task 3 (A3). Red tests first. ALL GREEN, tokens ≤ 6500 (if above, shorten without changing behaviour and report)."
 - **B / C / D / E1–E5 / F / G:** a Task-szekciók szerint.
 
@@ -149,4 +149,4 @@ Közös fejléc mint v1 (útvonalak, headless-recept, alarm-wrapper, `#include` 
 1. **Build → Assemble:** A3 ALL GREEN; B `src/gfx.txt` validált + v1 sorok érintetlenek; C `AUDIO OK`.
 2. **Assemble → Verify:** `run_tests.sh` ALL GREEN a teljes carton; `src/` törölve.
 3. **Verify → Fix:** high/medium → Fix → Verify (max 3 kör).
-4. **Kész:** ALL GREEN; a mappában `jedi.p8`, `test_lib.lua`, `test_jedi*.p8` (10 cart), `run_tests.sh`, `README.md`, `docs/`, `archive/` (2 fájl) — más semmi.
+4. **Kész:** ALL GREEN; a mappában `desert_strike.p8`, `test_lib.lua`, `test_ds*.p8` (10 cart), `run_tests.sh`, `README.md`, `docs/`, `archive/` (2 fájl) — más semmi.

@@ -1,7 +1,7 @@
 pico-8 cartridge // http://www.pico-8.com
 version 30
 __lua__
--- desert jedi
+-- desert strike
 -- tunables (spec 14)
 p_spd=1.5
 swing_t=8
@@ -90,7 +90,7 @@ function in_view(x,y,m)
 end
 
 function _init()
- cartdata("kepes_desert_jedi_1")
+ cartdata("kepes_desert_strike_1")
  poke(0x5f5c,255)
  g={best=dget(0)}
  new_game()
@@ -918,7 +918,7 @@ function cprint(s,y,c)
 end
 
 function draw_title()
- local s="\^w\^tdesert jedi"
+ local s="\^w\^tdesert strike"
  print(s,21,25,3)
  print(s,20,24,saber_col)
  print("⬅️➡️⬆️⬇️ move",38,80,1)

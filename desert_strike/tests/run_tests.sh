@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # Desert Jedi – headless tesztek + PICO-8 limit-ellenőrzés. Kilépőkód 0 = zöld.
-# Hívás: bash jedi/tests/run_tests.sh   (bárhonnan; a script a saját mappájába lép)
-# A tesztek több cartra vannak bontva (test_jedi*.p8, közös test_lib.lua), mert
-# minden cart a teljes játékkódot is behúzza (#include ../jedi.p8) és a PICO-8
-# 8192 tokenes limitje a cartonként számít. A játék: ../jedi.p8
+# Hívás: bash desert_strike/tests/run_tests.sh   (bárhonnan; a script a saját mappájába lép)
+# A tesztek több cartra vannak bontva (test_ds*.p8, közös test_lib.lua), mert
+# minden cart a teljes játékkódot is behúzza (#include ../desert_strike.p8) és a PICO-8
+# 8192 tokenes limitje a cartonként számít. A játék: ../desert_strike.p8
 set -u
 cd "$(dirname "$0")"
 P8="/Applications/PICO-8.app/Contents/MacOS/pico8"
 SHRINKO=(uvx --from git+https://github.com/thisismypassport/shrinko8 shrinko8)
 rc=0
 tot_ok=0; tot_fail=0
-for t in test_jedi*.p8; do
+for t in test_ds*.p8; do
   echo "== headless tests: $t =="
   out=$(perl -e 'alarm 90; exec @ARGV' -- "$P8" -x "$t" 2>&1); code=$?
   echo "$out" | grep -vE "^RUNNING: "
@@ -25,11 +25,11 @@ for t in test_jedi*.p8; do
 done
 echo "== TOTAL ok=$tot_ok fail=$tot_fail =="
 echo "== shrinko8 count =="
-cnt=$("${SHRINKO[@]}" ../jedi.p8 --count 2>&1); echo "$cnt"
+cnt=$("${SHRINKO[@]}" ../desert_strike.p8 --count 2>&1); echo "$cnt"
 tok=$(echo "$cnt" | sed -n 's/^tokens: \([0-9]*\).*/\1/p')
 [ -z "$tok" ] && { echo "!! could not parse token count"; rc=1; }
 [ -n "$tok" ] && [ "$tok" -gt 8192 ] && { echo "!! token limit exceeded"; rc=1; }
 echo "== shrinko8 lint (nem blokkoló) =="
-"${SHRINKO[@]}" ../jedi.p8 --lint 2>&1 | head -40
+"${SHRINKO[@]}" ../desert_strike.p8 --lint 2>&1 | head -40
 [ $rc -eq 0 ] && echo "ALL GREEN" || echo "RED"
 exit $rc

@@ -1,11 +1,11 @@
 pico-8 cartridge // http://www.pico-8.com
 version 30
 __lua__
-#include ../jedi.p8
+#include ../desert_strike.p8
 #include test_lib.lua
 function _init()
   local tr
-  cartdata("kepes_desert_jedi_test")
+  cartdata("kepes_desert_strike_test")
   tcase("v2-9 five swings kill vader: +300, music 0, gone after 60")
   arena() step(1,{[1]=true})
   -- cd keeps him in walk

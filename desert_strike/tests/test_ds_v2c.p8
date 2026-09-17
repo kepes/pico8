@@ -1,11 +1,11 @@
 pico-8 cartridge // http://www.pico-8.com
 version 30
 __lua__
-#include ../jedi.p8
+#include ../desert_strike.p8
 #include test_lib.lua
 function _init()
   local tr,n
-  cartdata("kepes_desert_jedi_test")
+  cartdata("kepes_desert_strike_test")
   tcase("v2-7 vader threshold, escorts, music 4, one at a time")
   arena()
   check(g.next_vader==15 and g.vader==nil,"starts with next_vader 15, no vader")

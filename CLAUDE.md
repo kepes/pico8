@@ -12,13 +12,13 @@ carts/
     <játék>.p8                  a cart — önálló (kód + gfx + sfx + music), nincs benne #include
     tests/                      test_lib.lua, test_*.p8 (#include ../<játék>.p8), run_tests.sh
     assets/                     külső assetek: referenciaképek, hang-/zeneforrások, generátor-scriptek — a cart nem tölti be
-    docs/superpowers/specs/     design spec-ek (YYYY-MM-DD-<téma>-design.md)
-    docs/superpowers/plans/     implementációs tervek
+    docs/specs/     design spec-ek (YYYY-MM-DD-<téma>-design.md)
+    docs/plans/     implementációs tervek
     archive/                    (opcionális) git előtti régi verziók; új verziót git-tel verziózunk, nem ide
   demos/                        gyári demók, nem verziózott
 ```
 
-Jelenlegi játék: `jedi/` (Desert Jedi, v2). Új játék = új almappa ugyanezzel a szerkezettel.
+Jelenlegi játék: `desert_strike/` (Desert Strike, korábban Desert Jedi; v2). Új játék = új almappa ugyanezzel a szerkezettel.
 
 ## Fejlesztés
 

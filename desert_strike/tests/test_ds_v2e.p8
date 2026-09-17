@@ -1,10 +1,10 @@
 pico-8 cartridge // http://www.pico-8.com
 version 30
 __lua__
-#include ../jedi.p8
+#include ../desert_strike.p8
 #include test_lib.lua
 function _init()
-  cartdata("kepes_desert_jedi_test")
+  cartdata("kepes_desert_strike_test")
   tcase("v2-10a worm: counter only after 60 s, tremor at 600 still")
   -- literals on purpose (spec 13/10, 14): 60 s gate; WORM_STILL = 600 = 20 s
   arena()

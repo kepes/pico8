@@ -1,6 +1,6 @@
 # Desert Jedi — PICO-8 játék design spec
 
-**Dátum:** 2026-09-16 · **Státusz:** jóváhagyott (a felhasználó kérdés-körben rögzítette a döntéseket), implementálva · **Cart:** `carts/jedi/jedi.p8`
+**Dátum:** 2026-09-16 · **Státusz:** jóváhagyott (a felhasználó kérdés-körben rögzítette a döntéseket), implementálva · **Cart:** `carts/desert_strike/desert_strike.p8`
 
 > **Hangolási napló (2026-09-16, bot-playtest után):** a blokk-rádiusz 7 → **9 px**, a lövésszórás ±0,02 → **±0,04** fordulat. A spec eredeti értékeivel a tétlen jedi 6 seedből 4-en 10 mp alatt meghalt, a csak-blokkoló pedig 6-ból 5-ször 60 mp előtt — az alábbi számok már a hangolt értékek.
 
@@ -29,7 +29,7 @@ Felülnézetes, egyképernyős arcade túlélőjáték PICO-8-ra. A játékos eg
 
 **Célok**
 
-- Egyetlen, önálló `.p8` cart (kód + sprite + sfx + zene egy fájlban), ami a PICO-8-ban `load jedi/jedi.p8` → `run` után azonnal játszható.
+- Egyetlen, önálló `.p8` cart (kód + sprite + sfx + zene egy fájlban), ami a PICO-8-ban `load desert_strike/desert_strike.p8` → `run` után azonnal játszható.
 - 30 fps (`_update`), 128×128, egy képernyő, nincs scroll.
 - Headless módban futtatható automatikus tesztek (`pico8 -x`), ami a játéklogikát a rajzolás nélkül is ellenőrzi.
 - Beleférés a PICO-8 limitekbe: ≤ 8192 token, ≤ 15360 byte tömörített méret.
@@ -204,22 +204,22 @@ Hívási sorrend `upd_play()`-ben: `upd_player` → `upd_troopers` (spawn is) �
 
 ## 12. Tesztelés (headless)
 
-- `carts/jedi/test_jedi.p8`: `#include jedi.p8` (csak a kódot húzza be; a PICO-8 ezt támogatja — ellenőrizve), majd **felülírja** `btn`/`btnp`-t egy `keys` táblából olvasó stubbal, és saját `_init`-et definiál, ami lefuttatja az összes tesztet, `printh`-val riportol (`PASS: ...` / `FAIL: ...`), a végén `printh("TESTS DONE ok=N fail=M")` és `extcmd("shutdown")`.
+- `carts/desert_strike/test_ds.p8`: `#include desert_strike.p8` (csak a kódot húzza be; a PICO-8 ezt támogatja — ellenőrizve), majd **felülírja** `btn`/`btnp`-t egy `keys` táblából olvasó stubbal, és saját `_init`-et definiál, ami lefuttatja az összes tesztet, `printh`-val riportol (`PASS: ...` / `FAIL: ...`), a végén `printh("TESTS DONE ok=N fail=M")` és `extcmd("shutdown")`.
 - A tesztek a játék `_update`/`_draw` függvényeit hívják közvetlenül (`step(n, keys)` segéddel), `srand(1)` determinizmussal, és a `g` táblát vizsgálják. A `_draw` is meghívódik minden lépésben, hogy a rajzoló-kód futásidejű hibáit is elkapja.
 - Kötelező tesztesetek: mozgás + clamp; fordulás; szikla-ütközés (csúszás); spawn + közelítés + megállás + telegráf + lövés; találat → hp−1 + inv; blokk kúpban → visszaverés (hp változatlan, owner=`"p"`); blokk háton kívül → hp−1; visszavert lövés öl (+20, dead, 90 frame után törlés); suhintás elöl öl (+10), hátul nem; `max_alive` ramp (0 s: 1, 20 s: 2, 200 s: 8); game over hp=0 → `state="over"`, 🅾️ → új menet, `score=0`, `hp=3`; sziklák nem lógnak a spawn-zónába és nem érnek össze; lövedék sziklában törlődik; lövedék képernyőn kívül törlődik.
-- `carts/jedi/run_tests.sh`: (1) `pico8 -x test_jedi.p8` időkorláttal (`perl -e 'alarm 60; exec @ARGV'`), a kimenetben `syntax error` / `runtime error` / `FAIL:` → hiba; `TESTS DONE ... fail=0` → siker; (2) `shrinko8 jedi.p8 --count` token/tömörített méret kiírása, 8192 token felett hiba; (3) `shrinko8 --lint` figyelmeztetések kiírása (nem blokkoló). Kilépőkód 0 = zöld.
-- Vizuális ellenőrzés: `pico8 -desktop <dir> -x shots.p8` ahol egy kis cart `extcmd("screen")`-nel ment képernyőképet a cím-, játék- és game-over képernyőről (ellenőrizve: headless módban működik, PNG a `-desktop` mappába). **Fontos:** a `#include` csak a Lua-kódot húzza be, ezért a képernyőképes segéd-cartba a `jedi.p8` `__gfx__`/`__sfx__`/`__music__` szekcióit is át kell másolni (`sed -n '/^__gfx__$/,$p' jedi.p8 >> shots.p8`), különben üres sprite-lappal rajzol.
+- `carts/desert_strike/run_tests.sh`: (1) `pico8 -x test_ds.p8` időkorláttal (`perl -e 'alarm 60; exec @ARGV'`), a kimenetben `syntax error` / `runtime error` / `FAIL:` → hiba; `TESTS DONE ... fail=0` → siker; (2) `shrinko8 desert_strike.p8 --count` token/tömörített méret kiírása, 8192 token felett hiba; (3) `shrinko8 --lint` figyelmeztetések kiírása (nem blokkoló). Kilépőkód 0 = zöld.
+- Vizuális ellenőrzés: `pico8 -desktop <dir> -x shots.p8` ahol egy kis cart `extcmd("screen")`-nel ment képernyőképet a cím-, játék- és game-over képernyőről (ellenőrizve: headless módban működik, PNG a `-desktop` mappába). **Fontos:** a `#include` csak a Lua-kódot húzza be, ezért a képernyőképes segéd-cartba a `desert_strike.p8` `__gfx__`/`__sfx__`/`__music__` szekcióit is át kell másolni (`sed -n '/^__gfx__$/,$p' desert_strike.p8 >> shots.p8`), különben üres sprite-lappal rajzol.
 
 ## 13. Fájlok és eszközök
 
 ```
-carts/jedi/
-  jedi.p8              a játék (önálló cart)
-  test_jedi.p8         headless tesztek (#include jedi.p8)
+carts/desert_strike/
+  desert_strike.p8              a játék (önálló cart)
+  test_ds.p8         headless tesztek (#include desert_strike.p8)
   run_tests.sh         teszt + token-limit + lint futtató
   README.md            játék leírása, irányítás, futtatás, tesztelés
-  docs/superpowers/specs/2026-09-16-desert-jedi-design.md   (ez a doksi)
-  docs/superpowers/plans/2026-09-16-desert-jedi-plan.md     (implementációs terv)
+  docs/specs/2026-09-16-desert-jedi-design.md   (ez a doksi)
+  docs/plans/2026-09-16-desert-jedi-plan.md     (implementációs terv)
 ```
 
 Eszközök: `/Applications/PICO-8.app/Contents/MacOS/pico8` (`-x` headless, `-desktop` screenshot-mappa), `uvx --from git+https://github.com/thisismypassport/shrinko8 shrinko8 <cart> --count|--lint`.
@@ -251,7 +251,7 @@ Eszközök: `/Applications/PICO-8.app/Contents/MacOS/pico8` (`-x` headless, `-de
 ## 15. Sikerkritériumok
 
 1. `run_tests.sh` zöld (minden teszteset PASS, nincs runtime/syntax error, ≤ 8192 token).
-2. A cart PICO-8-ban `load jedi/jedi.p8` → `run` után a címképernyővel indul, 🅾️-ra játszható.
+2. A cart PICO-8-ban `load desert_strike/desert_strike.p8` → `run` után a címképernyővel indul, 🅾️-ra játszható.
 3. Headless képernyőképeken (cím, játék közben 2+ katonával, game over) a sprite-ok felismerhetők: jedi barna köpeny + kék kard, katona fehér páncél, sziklák barnák a homokon, HUD olvasható.
 4. Az első 20 mp-ben soha nincs egynél több élő katona; 200 mp-nél 8.
 5. Megölt katona pontosan 90 frame-ig fekszik, aztán eltűnik.

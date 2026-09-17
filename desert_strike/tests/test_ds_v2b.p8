@@ -1,11 +1,11 @@
 pico-8 cartridge // http://www.pico-8.com
 version 30
 __lua__
-#include ../jedi.p8
+#include ../desert_strike.p8
 #include test_lib.lua
 function _init()
   local src,b,bad,tr,n
-  cartdata("kepes_desert_jedi_test")
+  cartdata("kepes_desert_strike_test")
   tcase("v2-5 deflect scatter 30% exact / 70% +/-10 deg")
   arena()
   srand(1)

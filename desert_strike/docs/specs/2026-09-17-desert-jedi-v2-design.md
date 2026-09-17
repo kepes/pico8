@@ -1,6 +1,6 @@
 # Desert Jedi v2 — görgetett világ, Vader, homokféreg, drágakövek
 
-**Dátum:** 2026-09-17 · **Státusz:** jóváhagyott (a felhasználó kérdés-körben rögzítette), implementálva 2026-09-17 · **Alap:** a v1 spec (`2026-09-16-desert-jedi-design.md`) minden szabálya érvényben marad, kivéve ahol ez a doksi felülírja. **Cart:** `carts/jedi/jedi.p8` (a v1 archívuma: `carts/jedi/archive/jedi-v1.p8`).
+**Dátum:** 2026-09-17 · **Státusz:** jóváhagyott (a felhasználó kérdés-körben rögzítette), implementálva 2026-09-17 · **Alap:** a v1 spec (`2026-09-16-desert-jedi-design.md`) minden szabálya érvényben marad, kivéve ahol ez a doksi felülírja. **Cart:** `carts/desert_strike/desert_strike.p8` (a v1 archívuma: `carts/desert_strike/archive/jedi-v1.p8`).
 
 A v1 egyképernyős arcade játékot 4×4 képernyős, görgetett sivataggá bővítjük, új ellenféllel (Darth Vader főellenség kísérőkkel), környezeti veszéllyel (homokféreg), gyűjthető drágakövekkel, új zenével és módosított visszaverés-szórással.
 
@@ -180,7 +180,7 @@ Hívási sorrend `upd_play()`: `upd_player` → `upd_gems` → `upd_troopers` (s
 
 ## 13. Tesztelés v2
 
-A v1 harness marad, de **több teszt-cartra bontva**: egy cart a játékkal (`#include jedi.p8`) plusz az összes teszttel túllépné a 8192 tokenes cart-limitet („program too large"), ezért a harness a közös `test_lib.lua`-ba került, és a tesztesetek `test_jedi.p8`, `test_jedi_b..e.p8` (v1 esetek) és `test_jedi_v2.p8`, `test_jedi_v2b..e.p8` (v2 esetek) cartokba; a `run_tests.sh` a `test_jedi*.p8` mintára fut végig és összesít (`TOTAL ok=N fail=M`). A `music` és `sfx` függvényeket a harness **stubolja és naplózza** (`music_log`, `sfx_log`), hogy a zene-váltás tesztelhető legyen. Új/módosított kötelező esetek:
+A v1 harness marad, de **több teszt-cartra bontva**: egy cart a játékkal (`#include desert_strike.p8`) plusz az összes teszttel túllépné a 8192 tokenes cart-limitet („program too large"), ezért a harness a közös `test_lib.lua`-ba került, és a tesztesetek `test_ds.p8`, `test_ds_b..e.p8` (v1 esetek) és `test_ds_v2.p8`, `test_ds_v2b..e.p8` (v2 esetek) cartokba; a `run_tests.sh` a `test_ds*.p8` mintára fut végig és összesít (`TOTAL ok=N fail=M`). A `music` és `sfx` függvényeket a harness **stubolja és naplózza** (`music_log`, `sfx_log`), hogy a zene-váltás tesztelhető legyen. Új/módosított kötelező esetek:
 
 1. **Kamera:** a jedi a világ közepén → `cam = (192,192)`; a jedi a (10, 20)-ban → `cam = (0,0)`; a jedi (500, 500)-ban → `cam = (384,384)`; a jedi világhatárra clampel (`x ≤ 508`, `y ≥ 12`).
 2. **Világgenerálás:** `#g.rocks ∈ [80, 120]`, egyik sem a kezdő 40×40-ben, páronként ≥ 14 px hézag, 10 px szélsáv; `#g.gems == 5`, egyik sem sziklában, páronként ≥ 40 px.

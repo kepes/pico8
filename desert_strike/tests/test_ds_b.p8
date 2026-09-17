@@ -1,11 +1,11 @@
 pico-8 cartridge // http://www.pico-8.com
 version 30
 __lua__
-#include ../jedi.p8
+#include ../desert_strike.p8
 #include test_lib.lua
 function _init()
   local tr,n
-  cartdata("kepes_desert_jedi_test")
+  cartdata("kepes_desert_strike_test")
   tcase("7 block from behind -> hp-1")
   arena() step(1,{[1]=true})
   mk_bolt(g.p.x-16,py,2,0)

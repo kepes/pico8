@@ -1,10 +1,10 @@
 pico-8 cartridge // http://www.pico-8.com
 version 30
 __lua__
-#include ../jedi.p8
+#include ../desert_strike.p8
 #include test_lib.lua
 function _init()
-  cartdata("kepes_desert_jedi_test")
+  cartdata("kepes_desert_strike_test")
   tcase("1 move right + clamp")
   arena() local x0=g.p.x
   step(5,{[1]=true}) check(g.p.x>x0,"x should grow")

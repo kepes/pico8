@@ -1,11 +1,11 @@
 pico-8 cartridge // http://www.pico-8.com
 version 30
 __lua__
-#include ../jedi.p8
+#include ../desert_strike.p8
 #include test_lib.lua
 function _init()
   local tr,n,b
-  cartdata("kepes_desert_jedi_test")
+  cartdata("kepes_desert_strike_test")
   tcase("17 swing kill lies exactly 90 frames")
   arena() step(1,{[1]=true})
   tr=mk_trooper(g.p.x+10,py)
