@@ -1,7 +1,7 @@
 pico-8 cartridge // http://www.pico-8.com
 version 30
 __lua__
-#include jedi.p8
+#include ../jedi.p8
 #include test_lib.lua
 function _init()
   local tr,n,b

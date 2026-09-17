@@ -93,7 +93,7 @@ A pontszám 32000-nél telítődik (v1-ből változatlan).
 ## Tesztelés
 
 ```bash
-bash run_tests.sh
+bash tests/run_tests.sh        # a jedi/ mappából (bárhonnan: bash jedi/tests/run_tests.sh)
 ```
 
 Ez három lépést futtat, kilépőkód `0` = minden zöld:
@@ -106,7 +106,7 @@ Ez három lépést futtat, kilépőkód `0` = minden zöld:
 
 ### A teszt-cartok szerkezete (`test_lib.lua` + `test_jedi*.p8`)
 
-Minden teszt-cart `#include jedi.p8`-tal húzza be a játék kódját, majd `#include test_lib.lua`-val a közös harnesst (relatív útvonalon, a cart mellől). A harness:
+A teszt-cartok a `tests/` almappában élnek; mind `#include ../jedi.p8`-tal húzza be a játék kódját (a `#include` csak a cart fájlhoz képest relatív utat fogad el), majd `#include test_lib.lua`-val a közös harnesst. A harness:
 
 - felülírja a `btn`/`btnp` függvényeket egy `keys` táblából olvasó stubbal (a tesztek soha nem nyúlnak a valódi inputhoz), valamint a `music`/`sfx` függvényeket egy naplózó stubbal (`music_log`, `sfx_log` táblák — így a zene-váltás és a hangeffektek is ellenőrizhetők a tesztekben anélkül, hogy valódi hang szólna),
 - definiál egy kis harnesst: `tcase(name)` jelöli az aktuális tesztesetet, `check(cond, msg)` gyűjti a PASS/FAIL-t (`printh("FAIL: ...")`-tal riportol hiba esetén), `step(n, keys)` `n` frame-et léptet (minden frame-ben `_update` **és** `_draw` is fut, hogy a rajzoló-kód futásidejű hibáit is elkapja), `fresh(seed)`/`arena()` determinisztikus új menetet indít (`srand`, sziklák/spawnok kikapcsolva), `mk_trooper`/`mk_bolt` kézzel tesz be entitásokat a `g` táblába,
@@ -119,20 +119,22 @@ Jelenleg **10 teszt-cart**, összesen **553 futó teszteset**, mind zöld.
 
 ```
 carts/jedi/
-  jedi.p8          a játék (önálló cart: __lua__ + __gfx__ + __sfx__ + __music__)
-  test_lib.lua     közös teszt-harness (#include-olva minden teszt-cartba)
-  test_jedi.p8      v1 alapesetek
-  test_jedi_b.p8    v1 esetek (folyt.)
-  test_jedi_c.p8    v1 esetek (folyt.)
-  test_jedi_d.p8    v1 esetek (folyt.)
-  test_jedi_e.p8    v1 esetek (folyt.)
-  test_jedi_v2.p8   v2: kamera, világgenerálás, spawn
-  test_jedi_v2b.p8  v2: szórás, drágakövek, zene-napló
-  test_jedi_v2c.p8  v2: Vader-küszöb, kísérők, mozgás/telegráf
-  test_jedi_v2d.p8  v2: Vader sebzés/stagger/halál, lövedék-elnyelés
-  test_jedi_v2e.p8  v2: homokféreg
-  run_tests.sh      teszt + token-limit + lint futtató (végigmegy az összes test_jedi*.p8-on)
-  README.md         ez a fájl
+  jedi.p8            a játék (önálló cart: __lua__ + __gfx__ + __sfx__ + __music__)
+  README.md          ez a fájl
+  tests/
+    run_tests.sh       teszt + token-limit + lint futtató (végigmegy az összes test_jedi*.p8-on)
+    test_lib.lua       közös teszt-harness (#include-olva minden teszt-cartba)
+    test_jedi.p8       v1 alapesetek
+    test_jedi_b.p8     v1 esetek (folyt.)
+    test_jedi_c.p8     v1 esetek (folyt.)
+    test_jedi_d.p8     v1 esetek (folyt.)
+    test_jedi_e.p8     v1 esetek (folyt.)
+    test_jedi_v2.p8    v2: kamera, világgenerálás, spawn
+    test_jedi_v2b.p8   v2: szórás, drágakövek, zene-napló
+    test_jedi_v2c.p8   v2: Vader-küszöb, kísérők, mozgás/telegráf
+    test_jedi_v2d.p8   v2: Vader sebzés/stagger/halál, lövedék-elnyelés
+    test_jedi_v2e.p8   v2: homokféreg
+  assets/            külső assetek (referenciaképek stb.), a cart nem tölti be
   archive/
     jedi-v1.p8         a v1 cart érintetlen mentése (ne módosítsd)
     test_jedi-v1.p8    a v1 teszt-cart érintetlen mentése (ne módosítsd)
